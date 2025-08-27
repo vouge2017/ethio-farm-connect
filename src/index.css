@@ -8,89 +8,113 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Ethiopian color palette inspired by Ethiopian flag and landscape */
+    --background: 38 16% 97%;
+    --foreground: 24 29% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 38 16% 97%;
+    --card-foreground: 24 29% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 38 16% 97%;
+    --popover-foreground: 24 29% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Ethiopian green - main brand color */
+    --primary: 120 60% 25%;
+    --primary-foreground: 38 16% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Ethiopian yellow accent */
+    --secondary: 45 95% 55%;
+    --secondary-foreground: 24 29% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted earth tones */
+    --muted: 38 16% 92%;
+    --muted-foreground: 24 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Ethiopian red accent */
+    --accent: 0 75% 55%;
+    --accent-foreground: 38 16% 97%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 38 16% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 38 16% 88%;
+    --input: 38 16% 88%;
+    --ring: 120 60% 25%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Ethiopian gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(120 60% 25%), hsl(120 60% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(45 95% 55%), hsl(45 95% 65%));
+    --gradient-sunset: linear-gradient(135deg, hsl(25 85% 60%), hsl(45 95% 55%));
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Shadows with Ethiopian green tint */
+    --shadow-primary: 0 10px 30px -10px hsl(120 60% 25% / 0.2);
+    --shadow-card: 0 4px 12px -2px hsl(120 60% 25% / 0.1);
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Sidebar */
+    --sidebar-background: 38 16% 95%;
+    --sidebar-foreground: 24 29% 20%;
+    --sidebar-primary: 120 60% 25%;
+    --sidebar-primary-foreground: 38 16% 97%;
+    --sidebar-accent: 38 16% 90%;
+    --sidebar-accent-foreground: 24 29% 20%;
+    --sidebar-border: 38 16% 85%;
+    --sidebar-ring: 120 60% 25%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Typography */
+    --font-amharic: 'Noto Sans Ethiopic', 'Roboto', sans-serif;
+    --font-body: 'Inter', 'Roboto', sans-serif;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with Ethiopian color adaptations */
+    --background: 24 29% 8%;
+    --foreground: 38 16% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 24 29% 10%;
+    --card-foreground: 38 16% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 24 29% 10%;
+    --popover-foreground: 38 16% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 120 50% 35%;
+    --primary-foreground: 38 16% 92%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 45 85% 45%;
+    --secondary-foreground: 24 29% 15%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 24 29% 15%;
+    --muted-foreground: 38 16% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 65% 45%;
+    --accent-foreground: 38 16% 92%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 38 16% 92%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 24 29% 18%;
+    --input: 24 29% 18%;
+    --ring: 120 50% 35%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(120 50% 25%), hsl(120 50% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(45 85% 45%), hsl(45 85% 55%));
+    --gradient-sunset: linear-gradient(135deg, hsl(25 75% 50%), hsl(45 85% 45%));
+    
+    --shadow-primary: 0 10px 30px -10px hsl(120 50% 15% / 0.3);
+    --shadow-card: 0 4px 12px -2px hsl(120 50% 15% / 0.2);
+    
+    --sidebar-background: 24 29% 12%;
+    --sidebar-foreground: 38 16% 85%;
+    --sidebar-primary: 120 50% 35%;
+    --sidebar-primary-foreground: 38 16% 92%;
+    --sidebar-accent: 24 29% 20%;
+    --sidebar-accent-foreground: 38 16% 85%;
+    --sidebar-border: 24 29% 20%;
+    --sidebar-ring: 120 50% 35%;
   }
 }
 
