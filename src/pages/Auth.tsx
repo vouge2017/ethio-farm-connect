@@ -53,7 +53,7 @@ export default function Auth() {
   const handleOTPSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (otp.length !== 4) {
+    if (otp.length !== 6) {
       return;
     }
 
@@ -106,7 +106,7 @@ export default function Auth() {
             <CardDescription>
               {step === 'phone' 
                 ? 'Enter your phone number to get started'
-                : `Enter the 4-digit code sent to ${formatEthiopianPhone(phoneNumber)}`
+                : `Enter the 6-digit code sent to ${formatEthiopianPhone(phoneNumber)}`
               }
             </CardDescription>
           </CardHeader>
@@ -192,7 +192,7 @@ export default function Auth() {
                   <InputOTP 
                     value={otp} 
                     onChange={setOtp}
-                    maxLength={4}
+                    maxLength={6}
                     disabled={loading}
                   >
                     <InputOTPGroup>
@@ -200,6 +200,8 @@ export default function Auth() {
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                       <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
@@ -207,7 +209,7 @@ export default function Auth() {
                 <Button 
                   type="submit" 
                   className="w-full"
-                  disabled={loading || otp.length !== 4}
+                  disabled={loading || otp.length !== 6}
                 >
                   {loading ? (
                     <>

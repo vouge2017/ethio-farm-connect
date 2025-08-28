@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: "Welcome to Yegebere Gebeya!",
       });
 
-      // Force page reload for clean state
+      // Navigate to main app instead of forcing reload
       window.location.href = '/';
     } catch (error: any) {
       toast({

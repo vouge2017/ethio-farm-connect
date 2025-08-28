@@ -49,8 +49,8 @@ serve(async (req) => {
       );
     }
 
-    // Generate new 4-digit OTP
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    // Generate new 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Store new OTP in database
@@ -73,11 +73,44 @@ serve(async (req) => {
 
     // Send OTP via requested channel
     if (channel === 'sms') {
-      // TODO: Integrate with Ethiopian SMS provider
-      console.log(`SMS OTP for ${phoneNumber}: ${otp}`);
+      try {
+        const twilioSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+        const twilioToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+        
+        if (twilioSid && twilioToken) {
+          const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`;
+          const auth = btoa(`${twilioSid}:${twilioToken}`);
+          
+          const response = await fetch(twilioUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${auth}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              From: '+1234567890', // Replace with your Twilio phone number
+              To: phoneNumber,
+              Body: `Your Yegebere Gebeya verification code is: ${otp}. This code expires in 10 minutes.`
+            })
+          });
+          
+          if (!response.ok) {
+            console.error('Twilio SMS failed:', await response.text());
+          }
+        }
+      } catch (error) {
+        console.error('SMS sending error:', error);
+      }
     } else if (channel === 'telegram') {
-      // TODO: Integrate with Telegram Bot API
-      console.log(`Telegram OTP for ${phoneNumber}: ${otp}`);
+      try {
+        const telegramToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
+        
+        if (telegramToken) {
+          console.log(`Telegram OTP for ${phoneNumber}: ${otp}`);
+        }
+      } catch (error) {
+        console.error('Telegram sending error:', error);
+      }
     }
 
     // For development, return the OTP (remove in production)
