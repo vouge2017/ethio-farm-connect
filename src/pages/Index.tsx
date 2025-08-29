@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useGuestMode } from '@/hooks/useGuestMode';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,13 +10,8 @@ import { Heart, Store, MessageCircle, TrendingUp, Users, Award, Loader2 } from '
 
 const Index = () => {
   const { user, loading, profile } = useAuth();
+  const { isGuestMode } = useGuestMode();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
 
   if (loading) {
     return (
@@ -28,9 +24,7 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return null; // Will redirect to auth
-  }
+  // Show welcome screen for both authenticated users and guests
 
   const quickStats = [
     { label: 'My Animals', value: '0', icon: Heart, color: 'text-primary' },
@@ -71,7 +65,7 @@ const Index = () => {
             እንኳን በደህና መጡ!
           </h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Welcome back, {profile?.display_name}
+            {isGuestMode ? 'Welcome to Yegebere Gebeya!' : `Welcome back, ${profile?.display_name}`}
           </p>
           <p className="text-sm text-muted-foreground">
             Manage your livestock with Ethiopia's most trusted platform
