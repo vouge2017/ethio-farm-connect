@@ -309,6 +309,8 @@ export type Database = {
       listings: {
         Row: {
           animal_id: string | null
+          attributes: Json | null
+          category: Database["public"]["Enums"]["listing_category"]
           contact_phone: string | null
           contact_telegram: string | null
           created_at: string
@@ -336,6 +338,8 @@ export type Database = {
         }
         Insert: {
           animal_id?: string | null
+          attributes?: Json | null
+          category?: Database["public"]["Enums"]["listing_category"]
           contact_phone?: string | null
           contact_telegram?: string | null
           created_at?: string
@@ -363,6 +367,8 @@ export type Database = {
         }
         Update: {
           animal_id?: string | null
+          attributes?: Json | null
+          category?: Database["public"]["Enums"]["listing_category"]
           contact_phone?: string | null
           contact_telegram?: string | null
           created_at?: string
@@ -735,6 +741,12 @@ export type Database = {
         | "donkey"
         | "horse"
         | "other"
+      listing_category:
+        | "livestock"
+        | "machinery"
+        | "equipment"
+        | "feed"
+        | "medicine"
       listing_status:
         | "active"
         | "pending_sale"
@@ -883,6 +895,13 @@ export const Constants = {
         "donkey",
         "horse",
         "other",
+      ],
+      listing_category: [
+        "livestock",
+        "machinery",
+        "equipment",
+        "feed",
+        "medicine",
       ],
       listing_status: [
         "active",
