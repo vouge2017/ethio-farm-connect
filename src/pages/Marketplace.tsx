@@ -45,8 +45,8 @@ export default function Marketplace() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('');
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('all-regions');
+  const [selectedType, setSelectedType] = useState('all-animals');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -154,8 +154,8 @@ export default function Marketplace() {
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          listing.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRegion = !selectedRegion || listing.location_region === selectedRegion;
-    const matchesType = !selectedType || listing.animal?.type === selectedType;
+    const matchesRegion = selectedRegion === 'all-regions' || listing.location_region === selectedRegion;
+    const matchesType = selectedType === 'all-animals' || listing.animal?.type === selectedType;
     
     return matchesSearch && matchesRegion && matchesType;
   });
@@ -345,7 +345,7 @@ export default function Marketplace() {
             <SelectValue placeholder="All Regions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Regions</SelectItem>
+            <SelectItem value="all-regions">All Regions</SelectItem>
             {ethiopianRegions.map((region) => (
               <SelectItem key={region} value={region}>{region}</SelectItem>
             ))}
@@ -357,7 +357,7 @@ export default function Marketplace() {
             <SelectValue placeholder="All Animals" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Animals</SelectItem>
+            <SelectItem value="all-animals">All Animals</SelectItem>
             <SelectItem value="cattle">Cattle</SelectItem>
             <SelectItem value="goat">Goat</SelectItem>
             <SelectItem value="sheep">Sheep</SelectItem>
