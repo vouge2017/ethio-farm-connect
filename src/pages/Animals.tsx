@@ -36,7 +36,7 @@ export default function Animals() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    type: '' as AnimalType,
+    type: 'cattle' as AnimalType,
     breed: '',
     gender: 'unknown' as Gender,
     birth_date: '',
@@ -108,7 +108,7 @@ export default function Animals() {
 
       setFormData({
         name: '',
-        type: '' as AnimalType,
+        type: 'cattle' as AnimalType,
         breed: '',
         gender: 'unknown',
         birth_date: '',
