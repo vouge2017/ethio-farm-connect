@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Upload, Plus } from 'lucide-react';
+import { MediaUpload } from '@/components/media/MediaUpload';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,7 +21,7 @@ interface Animal {
   type: string;
   breed?: string;
   gender: string;
-  photos: string[];
+    photos: string[];
 }
 
 export default function CreateListing() {
@@ -37,6 +38,7 @@ export default function CreateListing() {
     location_woreda: '',
     contact_phone: '',
     contact_telegram: '',
+    photos: [] as string[],
     attributes: {} as any
   });
 
@@ -116,7 +118,7 @@ export default function CreateListing() {
           location_woreda: formData.location_woreda || null,
           contact_phone: formData.contact_phone || null,
           contact_telegram: formData.contact_telegram || null,
-          photos: []
+          photos: formData.photos
         });
 
       if (error) throw error;
@@ -422,14 +424,16 @@ export default function CreateListing() {
                   </div>
                 </div>
 
-                {/* Media Upload Placeholder */}
+                {/* Media Upload */}
                 <div className="space-y-2">
                   <Label>Photos & Videos</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-muted-foreground">Click to upload photos and videos</p>
-                    <p className="text-xs text-muted-foreground">Support for images and longer videos</p>
-                  </div>
+                  <MediaUpload
+                    bucket="listing-photos"
+                    onUpload={(urls) => setFormData({...formData, photos: urls})}
+                    maxFiles={8}
+                    accept="images"
+                    existingFiles={formData.photos}
+                  />
                 </div>
 
                 {/* Submit Button */}

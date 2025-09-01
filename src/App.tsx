@@ -10,6 +10,9 @@ import Auth from "./pages/Auth";
 import Animals from "./pages/Animals";
 import Marketplace from "./pages/Marketplace";
 import CreateListing from "./pages/marketplace/CreateListing";
+import ListingDetail from "./pages/listings/ListingDetail";
+import MessagingHub from "./pages/messaging/MessagingHub";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +31,9 @@ const App = () => (
               <Route path="/animals" element={<Animals />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/marketplace/create" element={<CreateListing />} />
+              <Route path="/listings/:listingId" element={<ListingDetail />} />
+              <Route path="/messages" element={<MessagingHub />} />
+              <Route path="/admin" element={<AdminDashboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
