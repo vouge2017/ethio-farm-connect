@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link, useLocation } from 'react-router-dom';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 import { 
   Heart, 
   Store, 
@@ -90,9 +91,7 @@ export default function MainLayout({ children, activeTab }: MainLayoutProps) {
 
             {/* User Menu */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="p-2">
-                <Bell className="h-4 w-4" />
-              </Button>
+              <NotificationCenter />
               
               <div className="flex items-center gap-2">
                 <div className="hidden sm:block text-right">

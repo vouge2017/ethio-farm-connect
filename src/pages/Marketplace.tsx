@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, MapPin, MessageSquare, Eye, Search, Heart } from 'lucide-react';
+import { Plus, MapPin, MessageSquare, Eye, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { AdvancedSearch } from '@/components/search/AdvancedSearch';
+import { SkeletonLoader } from '@/components/ui/skeleton-loader';
+import { QUERY_KEYS } from '@/lib/queryClient';
 
 interface Listing {
   id: string;
@@ -41,28 +42,45 @@ interface Listing {
   };
 }
 
+interface SearchFilters {
+  searchTerm: string;
+  category: string;
+  region: string;
+  priceRange: [number, number];
+  distanceRadius: number;
+  animalType?: string;
+  breed?: string;
+  ageRange?: [number, number];
+  gender?: string;
+  sortBy: string;
+  savedSearches: SavedSearch[];
+}
+
+interface SavedSearch {
+  id: string;
+  name: string;
+  filters: Partial<SearchFilters>;
+  createdAt: string;
+}
+
 export default function Marketplace() {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all-categories');
-  const [selectedRegion, setSelectedRegion] = useState('all-regions');
-  const [selectedType, setSelectedType] = useState('all-animals');
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const ethiopianRegions = [
-    'Addis Ababa', 'Afar', 'Amhara', 'Benishangul-Gumuz', 'Dire Dawa',
-    'Gambela', 'Harari', 'Oromia', 'Sidama', 'SNNP', 'Somali', 'Tigray'
-  ];
+  const [filters, setFilters] = useState<SearchFilters>({
+    searchTerm: '',
+    category: 'all-categories',
+    region: 'all-regions',
+    priceRange: [0, 1000000],
+    distanceRadius: 50,
+    sortBy: 'created_at_desc',
+    savedSearches: []
+  });
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
-  const fetchListings = async () => {
-    try {
+  const { data: listings = [], isLoading } = useQuery({
+    queryKey: QUERY_KEYS.search(filters),
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('listings')
         .select(`
@@ -74,29 +92,59 @@ export default function Marketplace() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setListings(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      return data || [];
     }
+  });
+
+  // Filter listings based on current filters
+  const filteredListings = useMemo(() => {
+    return listings.filter(listing => {
+      const matchesSearch = !filters.searchTerm || 
+        listing.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        listing.description.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      
+      const matchesCategory = filters.category === 'all-categories' || listing.category === filters.category;
+      const matchesRegion = filters.region === 'all-regions' || listing.location_region === filters.region;
+      const matchesPrice = listing.price >= filters.priceRange[0] && listing.price <= filters.priceRange[1];
+      
+      return matchesSearch && matchesCategory && matchesRegion && matchesPrice;
+    });
+  }, [listings, filters]);
+
+  const handleFiltersChange = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
   };
 
-  const filteredListings = listings.filter(listing => {
-    const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all-categories' || listing.category === selectedCategory;
-    const matchesRegion = selectedRegion === 'all-regions' || listing.location_region === selectedRegion;
-    const matchesType = selectedType === 'all-animals' || 
-                       (listing.category === 'livestock' && listing.animal?.type === selectedType) ||
-                       (listing.category !== 'livestock' && listing.attributes?.type === selectedType);
+  const handleClearFilters = () => {
+    setFilters({
+      searchTerm: '',
+      category: 'all-categories',
+      region: 'all-regions',
+      priceRange: [0, 1000000],
+      distanceRadius: 50,
+      sortBy: 'created_at_desc',
+      savedSearches: filters.savedSearches
+    });
+  };
+
+  const handleSaveSearch = (name: string) => {
+    const newSearch: SavedSearch = {
+      id: Date.now().toString(),
+      name,
+      filters: { ...filters },
+      createdAt: new Date().toISOString()
+    };
     
-    return matchesSearch && matchesCategory && matchesRegion && matchesType;
-  });
+    setFilters(prev => ({
+      ...prev,
+      savedSearches: [...prev.savedSearches, newSearch]
+    }));
+    
+    toast({
+      title: "Search Saved",
+      description: `"${name}" has been saved to your searches`
+    });
+  };
 
   const getVerificationBadge = (tier: string) => {
     switch (tier) {
@@ -136,20 +184,10 @@ export default function Marketplace() {
     return getCategoryIcon(listing.category);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto p-4 max-w-6xl">
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="h-32 bg-muted rounded-t"></div>
-              <CardHeader className="p-3">
-                <div className="h-3 bg-muted rounded w-3/4"></div>
-                <div className="h-2 bg-muted rounded w-1/2"></div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
+        <SkeletonLoader type="search-results" count={8} />
       </div>
     );
   }
@@ -170,58 +208,13 @@ export default function Marketplace() {
         )}
       </div>
 
-      {/* Category Tabs */}
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="all-categories">All</TabsTrigger>
-          <TabsTrigger value="livestock">Livestock</TabsTrigger>
-          <TabsTrigger value="machinery">Machinery</TabsTrigger>
-          <TabsTrigger value="equipment">Equipment</TabsTrigger>
-          <TabsTrigger value="feed">Feed</TabsTrigger>
-          <TabsTrigger value="medicine">Medicine</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search listings..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-          <SelectTrigger className="w-full md:w-40">
-            <SelectValue placeholder="All Regions" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all-regions">All Regions</SelectItem>
-            {ethiopianRegions.map((region) => (
-              <SelectItem key={region} value={region}>{region}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {selectedCategory === 'livestock' && (
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-full md:w-40">
-              <SelectValue placeholder="All Animals" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-animals">All Animals</SelectItem>
-              <SelectItem value="cattle">Cattle</SelectItem>
-              <SelectItem value="goat">Goat</SelectItem>
-              <SelectItem value="sheep">Sheep</SelectItem>
-              <SelectItem value="chicken">Chicken</SelectItem>
-              <SelectItem value="camel">Camel</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+      {/* Advanced Search */}
+      <AdvancedSearch
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={handleClearFilters}
+        onSaveSearch={handleSaveSearch}
+      />
 
       {filteredListings.length === 0 ? (
         <Card className="text-center py-8">
@@ -229,7 +222,7 @@ export default function Marketplace() {
             <div className="text-4xl mb-3">🏪</div>
             <h3 className="text-lg font-semibold mb-2">No Listings Found</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {searchTerm || selectedRegion || selectedType 
+              {filters.searchTerm || filters.region !== 'all-regions' || filters.category !== 'all-categories' 
                 ? "Try adjusting your search criteria"
                 : "Be the first to post a listing in the marketplace"
               }
