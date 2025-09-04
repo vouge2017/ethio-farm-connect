@@ -7,10 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Heart, Activity, Calendar, MapPin, Camera, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { MediaUpload } from '@/components/media/MediaUpload';
 
 interface Animal {
   id: string;
@@ -34,6 +36,8 @@ export default function Animals() {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingAnimal, setEditingAnimal] = useState<Animal | null>(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     type: 'cattle' as AnimalType,
@@ -78,33 +82,55 @@ export default function Animals() {
     if (!formData.name || !formData.type) return;
 
     try {
-      // Generate animal ID using database function
-      const { data: animalData, error } = await supabase.rpc('generate_animal_id', {
-        owner_name: profile?.display_name || 'User',
-        animal_type_param: formData.type
-      });
+      if (editingAnimal) {
+        // Update existing animal
+        const { error } = await supabase
+          .from('animals')
+          .update({
+            name: formData.name,
+            type: formData.type,
+            breed: formData.breed || null,
+            gender: formData.gender,
+            birth_date: formData.birth_date || null,
+            notes: formData.notes || null
+          })
+          .eq('id', editingAnimal.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const { error: insertError } = await supabase
-        .from('animals')
-        .insert({
-          animal_id: animalData,
-          owner_id: user?.id!,
-          name: formData.name,
-          type: formData.type,
-          breed: formData.breed || null,
-          gender: formData.gender,
-          birth_date: formData.birth_date || null,
-          notes: formData.notes || null
+        toast({
+          title: "Success",
+          description: "Animal updated successfully!"
+        });
+      } else {
+        // Create new animal
+        const { data: animalData, error } = await supabase.rpc('generate_animal_id', {
+          owner_name: profile?.display_name || 'User',
+          animal_type_param: formData.type
         });
 
-      if (insertError) throw insertError;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Animal registered successfully!"
-      });
+        const { error: insertError } = await supabase
+          .from('animals')
+          .insert({
+            animal_id: animalData,
+            owner_id: user?.id!,
+            name: formData.name,
+            type: formData.type,
+            breed: formData.breed || null,
+            gender: formData.gender,
+            birth_date: formData.birth_date || null,
+            notes: formData.notes || null
+          });
+
+        if (insertError) throw insertError;
+
+        toast({
+          title: "Success",
+          description: "Animal registered successfully!"
+        });
+      }
 
       setFormData({
         name: '',
@@ -114,8 +140,71 @@ export default function Animals() {
         birth_date: '',
         notes: ''
       });
+      setEditingAnimal(null);
       setShowForm(false);
       fetchAnimals();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleEdit = (animal: Animal) => {
+    setEditingAnimal(animal);
+    setFormData({
+      name: animal.name,
+      type: animal.type as AnimalType,
+      breed: animal.breed || '',
+      gender: animal.gender as Gender,
+      birth_date: animal.birth_date || '',
+      notes: animal.notes || ''
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (animalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('animals')
+        .update({ is_active: false })
+        .eq('id', animalId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Animal removed successfully!"
+      });
+
+      fetchAnimals();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePhotoUpload = async (urls: string[], animalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('animals')
+        .update({ photos: urls })
+        .eq('id', animalId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Photos uploaded successfully!"
+      });
+
+      fetchAnimals();
+      setShowPhotoUpload(null);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -187,7 +276,20 @@ export default function Animals() {
           <p className="text-muted-foreground">Manage your livestock inventory</p>
         </div>
         
-        <Dialog open={showForm} onOpenChange={setShowForm}>
+        <Dialog open={showForm} onOpenChange={(open) => {
+          setShowForm(open);
+          if (!open) {
+            setEditingAnimal(null);
+            setFormData({
+              name: '',
+              type: 'cattle' as AnimalType,
+              breed: '',
+              gender: 'unknown',
+              birth_date: '',
+              notes: ''
+            });
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
@@ -196,9 +298,9 @@ export default function Animals() {
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Register New Animal</DialogTitle>
+              <DialogTitle>{editingAnimal ? 'Edit Animal' : 'Register New Animal'}</DialogTitle>
               <DialogDescription>
-                Add a new animal to your digital barn
+                {editingAnimal ? 'Update animal information' : 'Add a new animal to your digital barn'}
               </DialogDescription>
             </DialogHeader>
             
@@ -285,7 +387,7 @@ export default function Animals() {
 
               <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
-                  Register Animal
+                  {editingAnimal ? 'Update Animal' : 'Register Animal'}
                 </Button>
                 <Button 
                   type="button" 
@@ -358,21 +460,89 @@ export default function Animals() {
                   </p>
                 )}
                 
+                {animal.photos && animal.photos.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {animal.photos.slice(0, 2).map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`${animal.name} photo ${index + 1}`}
+                        className="w-full h-20 object-cover rounded-md"
+                      />
+                    ))}
+                    {animal.photos.length > 2 && (
+                      <div className="w-full h-20 bg-muted rounded-md flex items-center justify-center text-sm text-muted-foreground">
+                        +{animal.photos.length - 2} more
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1 gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 gap-1"
+                    onClick={() => handleEdit(animal)}
+                  >
                     <Edit className="h-3 w-3" />
                     Edit
                   </Button>
-                  <Button variant="outline" size="sm" className="gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-1"
+                    onClick={() => setShowPhotoUpload(animal.id)}
+                  >
                     <Camera className="h-3 w-3" />
                     Photos
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-1 text-destructive hover:text-destructive">
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Animal</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove {animal.name} from your barn? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(animal.id)}>
+                          Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      {/* Photo Upload Dialog */}
+      <Dialog open={!!showPhotoUpload} onOpenChange={() => setShowPhotoUpload(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Photos</DialogTitle>
+            <DialogDescription>
+              Upload photos for {animals.find(a => a.id === showPhotoUpload)?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <MediaUpload
+            bucket="animal-photos"
+            onUpload={(urls) => handlePhotoUpload(urls, showPhotoUpload!)}
+            maxFiles={5}
+            accept="images"
+            existingFiles={animals.find(a => a.id === showPhotoUpload)?.photos || []}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
