@@ -718,6 +718,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_full_profile: {
+        Args: { profile_user_id: string; viewer_id: string }
+        Returns: boolean
+      }
       generate_animal_id: {
         Args: {
           animal_type_param: Database["public"]["Enums"]["animal_type"]
