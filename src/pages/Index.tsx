@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGuestMode } from '@/hooks/useGuestMode';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,8 +56,7 @@ const Index = () => {
   ];
 
   return (
-    <MainLayout activeTab={undefined}>
-      <div className="space-y-6 p-3">
+    <div className="space-y-6 p-3">
         {/* Welcome Section - Compact */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-1">
@@ -149,7 +147,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </MainLayout>
   );
 };
 
