@@ -12,13 +12,13 @@ interface NewMainLayoutProps {
 const mobileNavigation = [
   {
     id: 'barn',
-    nameEn: 'Barn',
+    nameEn: 'Animals',
     icon: Heart,
     href: '/animals',
   },
   {
     id: 'marketplace',
-    nameEn: 'Market',
+    nameEn: 'Marketplace',
     icon: Store,
     href: '/marketplace',
   },

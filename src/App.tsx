@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,12 +16,22 @@ import MessagingHub from "./pages/messaging/MessagingHub";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
+
 const App = () => (
-  <AuthProvider>
-    <GuestModeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <GuestModeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/" element={
@@ -72,6 +83,7 @@ const App = () => (
       </TooltipProvider>
     </GuestModeProvider>
   </AuthProvider>
+</QueryClientProvider>
 );
 
 export default App;

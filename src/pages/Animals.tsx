@@ -272,7 +272,7 @@ export default function Animals() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Digital Barn</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Digital Barn</h1>
           <p className="text-muted-foreground">Manage your livestock inventory</p>
         </div>
         
@@ -403,14 +403,14 @@ export default function Animals() {
       </div>
 
       {animals.length === 0 ? (
-        <Card className="text-center py-12">
+        <Card className="text-center py-12 bg-gradient-to-br from-primary/5 to-secondary/5 border-dashed border-2 border-primary/20">
           <CardContent>
             <div className="text-6xl mb-4">🐄</div>
-            <h3 className="text-xl font-semibold mb-2">No Animals Registered</h3>
+            <h3 className="text-xl font-semibold mb-2 text-primary">No Animals Registered</h3>
             <p className="text-muted-foreground mb-4">
               Start building your digital barn by registering your first animal
             </p>
-            <Button onClick={() => setShowForm(true)} className="gap-2">
+            <Button onClick={() => setShowForm(true)} className="gap-2 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
               <Plus className="h-4 w-4" />
               Register First Animal
             </Button>
@@ -419,7 +419,8 @@ export default function Animals() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {animals.map((animal) => (
-            <Card key={animal.id} className="hover:shadow-lg transition-shadow">
+            <Card key={animal.id} className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-l-4 border-l-primary/20 hover:border-l-primary"
+                  style={{ boxShadow: 'var(--shadow-card)' }}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
