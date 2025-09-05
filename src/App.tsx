@@ -10,6 +10,9 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Animals from "./pages/Animals";
 import Marketplace from "./pages/Marketplace";
+import Community from "./pages/Community";
+import DailyTips from "./pages/DailyTips";
+import Veterinarians from "./pages/Veterinarians";
 import CreateListing from "./pages/marketplace/CreateListing";
 import ListingDetail from "./pages/listings/ListingDetail";
 import MessagingHub from "./pages/messaging/MessagingHub";
@@ -71,10 +74,17 @@ const App = () => (
           } />
           <Route path="/community" element={
             <NewMainLayout>
-              <div className="text-center py-12">
-                <h1 className="text-2xl font-bold mb-4">Community Coming Soon</h1>
-                <p className="text-muted-foreground">Q&A forum and daily tips will be available here.</p>
-              </div>
+              <Community />
+            </NewMainLayout>
+          } />
+          <Route path="/daily-tips" element={
+            <NewMainLayout>
+              <DailyTips />
+            </NewMainLayout>
+          } />
+          <Route path="/veterinarians" element={
+            <NewMainLayout>
+              <Veterinarians />
             </NewMainLayout>
           } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

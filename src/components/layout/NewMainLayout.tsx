@@ -3,7 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Store, MessageCircle } from "lucide-react";
+import { Heart, Store, MessageCircle, Lightbulb, Stethoscope } from "lucide-react";
 
 interface NewMainLayoutProps {
   children: ReactNode;
@@ -27,6 +27,18 @@ const mobileNavigation = [
     nameEn: 'Community',
     icon: MessageCircle,
     href: '/community',
+  },
+  {
+    id: 'tips',
+    nameEn: 'Tips',
+    icon: Lightbulb,
+    href: '/daily-tips',
+  },
+  {
+    id: 'vets',
+    nameEn: 'Vets',
+    icon: Stethoscope,
+    href: '/veterinarians',
   },
 ];
 
