@@ -270,10 +270,17 @@ export default function Animals() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Digital Barn</h1>
-          <p className="text-muted-foreground">Manage your livestock inventory</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            🐄 My Digital Barn
+          </h1>
+          <p className="text-lg text-muted-foreground mb-2">Manage your livestock and track their health digitally</p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <span>🐾 {animals.length} animals registered</span>
+            <span>📊 Digital records</span>
+            <span>🇪🇹 Ethiopian farming innovation</span>
+          </div>
         </div>
         
         <Dialog open={showForm} onOpenChange={(open) => {

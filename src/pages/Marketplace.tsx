@@ -194,10 +194,17 @@ export default function Marketplace() {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-xl font-bold text-primary">Marketplace</h1>
-          <p className="text-sm text-muted-foreground">Buy and sell across categories</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            🏪 Ethiopian Marketplace
+          </h1>
+          <p className="text-lg text-muted-foreground mb-2">Buy and sell livestock, equipment, and farming supplies</p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <span>🐄 {listings.length} active listings</span>
+            <span>🌍 Nationwide network</span>
+            <span>✅ Verified sellers</span>
+          </div>
         </div>
         
         {user && (
@@ -239,10 +246,16 @@ export default function Marketplace() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredListings.map((listing) => (
             <Card key={listing.id} className="hover:shadow-md transition-shadow overflow-hidden cursor-pointer">
-              <div className="h-32 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
-                <div className="text-4xl">
+              <div className="relative h-32 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/5 to-secondary/10"></div>
+                <div className="text-4xl relative z-10 filter drop-shadow-sm">
                   {getItemIcon(listing)}
                 </div>
+                {getVerificationBadge(listing.verification_tier) && (
+                  <div className="absolute top-2 right-2">
+                    {getVerificationBadge(listing.verification_tier)}
+                  </div>
+                )}
               </div>
               
               <CardHeader className="p-3">

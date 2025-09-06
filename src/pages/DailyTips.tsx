@@ -140,16 +140,21 @@ export default function DailyTips() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Daily Tips
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            💡 Daily Farming Tips
           </h1>
-          <p className="text-muted-foreground">
-            {language === 'am' ? 'የእለት ተእለት የግብርና ምክሮች' : 
-             language === 'om' ? 'Gorsawwan qonnaa guyyaa guyyaa' :
-             'Daily farming tips and advice'}
+          <p className="text-lg text-muted-foreground mb-2">
+            {language === 'am' ? 'የእለት ተእለት የግብርና ምክሮች እና ጠቃሚ ምክሮች' : 
+             language === 'om' ? 'Gorsawwan qonnaa guyyaa guyyaa fi gorsawwan barbaachisoo' :
+             'Daily farming tips and expert advice for Ethiopian farmers'}
           </p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <span>📚 {tips.length} tips available</span>
+            <span>🌾 Expert knowledge</span>
+            <span>🇪🇹 Ethiopia-specific content</span>
+          </div>
         </div>
         
         <Select value={language} onValueChange={(value: 'en' | 'am' | 'om') => setLanguage(value)}>

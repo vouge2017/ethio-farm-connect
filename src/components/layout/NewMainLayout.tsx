@@ -75,18 +75,18 @@ export default function NewMainLayout({ children }: NewMainLayoutProps) {
 
         {/* Mobile Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border z-50">
-          <nav className="grid grid-cols-3 gap-1 p-2 max-w-md mx-auto">
+          <nav className="grid grid-cols-5 gap-1 p-2 max-w-lg mx-auto">
             {mobileNavigation.map((item) => (
               <Link
                 key={item.id}
                 to={item.href}
-                className={`flex flex-col items-center gap-1 p-3 rounded-lg transition-colors ${
+                className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
                   isActive(item.href)
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <item.icon className="h-6 w-6" />
+                <item.icon className="h-5 w-5" />
                 <span className="text-xs font-medium">{item.nameEn}</span>
               </Link>
             ))}

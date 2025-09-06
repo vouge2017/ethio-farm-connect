@@ -145,12 +145,17 @@ export default function Veterinarians() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Veterinarians
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            👨‍⚕️ Veterinarians
           </h1>
-          <p className="text-muted-foreground">Find qualified veterinarians for your livestock</p>
+          <p className="text-lg text-muted-foreground mb-2">Connect with qualified veterinarians across Ethiopia</p>
+          <div className="flex gap-4 text-sm text-muted-foreground">
+            <span>🩺 {vets.length} verified vets</span>
+            <span>⭐ Professional service</span>
+            <span>📞 Direct consultation</span>
+          </div>
         </div>
       </div>
 

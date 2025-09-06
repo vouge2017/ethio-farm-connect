@@ -360,12 +360,17 @@ export default function Community() {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Community Q&A
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+            🤝 Community Q&A
           </h1>
-          <p className="text-muted-foreground">Ask questions and share knowledge with fellow farmers</p>
+          <p className="text-muted-foreground text-lg">Ask questions and share knowledge with fellow Ethiopian farmers</p>
+          <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+            <span>💬 {questions.length} questions</span>
+            <span>👥 Active community</span>
+            <span>🌍 Ethiopia-wide network</span>
+          </div>
         </div>
         
         {user && (
