@@ -85,7 +85,7 @@ export default function Marketplace() {
         .from('listings')
         .select(`
           *,
-          seller:profiles!seller_id(display_name, location_region),
+          seller:public_profiles!seller_id(display_name, location_region),
           animal:animals(type, breed, gender)
         `)
         .eq('status', 'active')

@@ -28,10 +28,8 @@ interface ListingDetail {
   view_count: number;
   created_at: string;
   seller: {
-    id: string;
     display_name: string;
     location_region?: string;
-    phone_number?: string;
   };
   animal?: {
     type: string;
@@ -62,7 +60,7 @@ export default function ListingDetail() {
         .from('listings')
         .select(`
           *,
-          seller:profiles!seller_id(id, display_name, location_region, phone_number),
+          seller:public_profiles!seller_id(display_name, location_region),
           animal:animals(type, breed, gender)
         `)
         .eq('listing_id', listingId)

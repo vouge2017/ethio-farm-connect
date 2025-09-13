@@ -27,7 +27,6 @@ interface VetProfile {
     display_name: string;
     location_region?: string;
     location_zone?: string;
-    phone_number?: string;
   };
 }
 
@@ -55,8 +54,7 @@ export default function Veterinarians() {
           profiles!vet_profiles_user_id_fkey(
             display_name,
             location_region,
-            location_zone,
-            phone_number
+            location_zone
           )
         `)
         .eq('is_verified', true)
@@ -358,13 +356,8 @@ export default function Veterinarians() {
             <div className="text-center py-8">
               <Stethoscope className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                Booking system is coming soon. For now, please contact the veterinarian directly.
+                Booking system is coming soon. Please contact the veterinarian through the platform messaging system.
               </p>
-              {selectedVet?.profiles?.phone_number && (
-                <p className="mt-2 font-medium">
-                  Phone: {selectedVet.profiles.phone_number}
-                </p>
-              )}
             </div>
             
             <div className="flex gap-2">
