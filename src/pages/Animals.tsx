@@ -29,7 +29,7 @@ interface Animal {
   created_at: string;
 }
 
-type AnimalType = 'cattle' | 'goat' | 'sheep' | 'chicken' | 'camel' | 'donkey' | 'horse';
+type AnimalType = 'ox' | 'cow' | 'calf' | 'goat' | 'sheep' | 'chicken' | 'camel' | 'donkey' | 'horse';
 type Gender = 'male' | 'female' | 'unknown';
 
 export default function Animals() {
@@ -40,7 +40,7 @@ export default function Animals() {
   const [showPhotoUpload, setShowPhotoUpload] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'cattle' as AnimalType,
+    type: 'ox' as AnimalType,
     breed: '',
     gender: 'unknown' as Gender,
     birth_date: '',
@@ -134,7 +134,7 @@ export default function Animals() {
 
       setFormData({
         name: '',
-        type: 'cattle' as AnimalType,
+        type: 'ox' as AnimalType,
         breed: '',
         gender: 'unknown',
         birth_date: '',
@@ -215,7 +215,9 @@ export default function Animals() {
   };
 
   const animalTypes = [
-    { value: 'cattle', label: 'Cattle' },
+    { value: 'ox', label: 'Ox' },
+    { value: 'cow', label: 'Cow' },
+    { value: 'calf', label: 'Calf' },
     { value: 'goat', label: 'Goat' },
     { value: 'sheep', label: 'Sheep' },
     { value: 'chicken', label: 'Chicken' },
@@ -289,7 +291,7 @@ export default function Animals() {
             setEditingAnimal(null);
             setFormData({
               name: '',
-              type: 'cattle' as AnimalType,
+              type: 'ox' as AnimalType,
               breed: '',
               gender: 'unknown',
               birth_date: '',
