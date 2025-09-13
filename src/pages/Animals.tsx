@@ -88,7 +88,7 @@ export default function Animals() {
           .from('animals')
           .update({
             name: formData.name,
-            type: formData.type,
+            type: formData.type as any,
             breed: formData.breed || null,
             gender: formData.gender,
             birth_date: formData.birth_date || null,
@@ -106,7 +106,7 @@ export default function Animals() {
         // Create new animal
         const { data: animalData, error } = await supabase.rpc('generate_animal_id', {
           owner_name: profile?.display_name || 'User',
-          animal_type_param: formData.type
+          animal_type_param: formData.type as any
         });
 
         if (error) throw error;
@@ -117,7 +117,7 @@ export default function Animals() {
             animal_id: animalData,
             owner_id: user?.id!,
             name: formData.name,
-            type: formData.type,
+            type: formData.type as any,
             breed: formData.breed || null,
             gender: formData.gender,
             birth_date: formData.birth_date || null,
