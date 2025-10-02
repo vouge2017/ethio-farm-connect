@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +26,8 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
-  const { user, profile, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [stats, setStats] = useState<AdminStats>({
@@ -38,15 +40,20 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!loading && (!user || profile?.role !== 'admin')) {
+    // Wait for both auth and role to load
+    if (loading || roleLoading) return;
+    
+    // Redirect if not admin
+    if (!user || !isAdmin) {
       navigate('/');
       return;
     }
     
-    if (user && profile?.role === 'admin') {
+    // Fetch admin data if user is admin
+    if (user && isAdmin) {
       fetchAdminData();
     }
-  }, [user, profile, loading, navigate]);
+  }, [user, isAdmin, loading, roleLoading, navigate]);
 
   const fetchAdminData = async () => {
     try {
@@ -136,11 +143,11 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) {
+  if (loading || roleLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  if (!user || profile?.role !== 'admin') {
+  if (!user || !isAdmin) {
     return <div className="flex items-center justify-center h-screen">Access Denied</div>;
   }
 

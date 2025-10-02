@@ -731,6 +731,30 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vet_profiles: {
         Row: {
           available_hours: string | null
@@ -834,6 +858,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       animal_gender: "male" | "female" | "unknown"
@@ -846,6 +877,7 @@ export type Database = {
         | "donkey"
         | "horse"
         | "other"
+      app_role: "admin" | "moderator" | "vet" | "farmer"
       listing_category:
         | "livestock"
         | "machinery"
@@ -1001,6 +1033,7 @@ export const Constants = {
         "horse",
         "other",
       ],
+      app_role: ["admin", "moderator", "vet", "farmer"],
       listing_category: [
         "livestock",
         "machinery",

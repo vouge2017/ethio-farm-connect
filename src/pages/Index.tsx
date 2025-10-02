@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Store, MessageCircle, TrendingUp, Users, Award, Loader2 } from 'lucide-react';
+import { DailyTip } from '@/components/tips/DailyTip';
 
 const Index = () => {
   const { user, loading, profile } = useAuth();
@@ -109,23 +110,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Daily Tip - Compact */}
-        <Card className="border-2 bg-gradient-to-r from-primary/5 to-secondary/5">
-          <CardHeader className="p-3">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm">የዕለቱ ምክር - Daily Tip</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            <p className="text-xs text-muted-foreground mb-1 line-clamp-2">
-              Clean water is essential for healthy livestock. Ensure your animals have access to fresh, clean water at all times.
-            </p>
-            <p className="text-xs text-muted-foreground opacity-75 line-clamp-1">
-              ንፁህ ውሃ ለጤናማ እንስሳት ወሳኝ ነው። እንስሳትዎ ሁልጊዜ ንፁህ እና ንፁህ ውሃ እንዲያገኙ ያረጋግጡ።
-            </p>
-          </CardContent>
-        </Card>
+        {/* Daily Tip - Dynamic from Database */}
+        <DailyTip />
 
         {/* Platform Stats - Compact grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
