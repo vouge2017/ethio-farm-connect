@@ -877,6 +877,9 @@ export type Database = {
         | "donkey"
         | "horse"
         | "other"
+        | "ox"
+        | "cow"
+        | "calf"
       app_role: "admin" | "moderator" | "vet" | "farmer"
       listing_category:
         | "livestock"
@@ -1032,6 +1035,9 @@ export const Constants = {
         "donkey",
         "horse",
         "other",
+        "ox",
+        "cow",
+        "calf",
       ],
       app_role: ["admin", "moderator", "vet", "farmer"],
       listing_category: [
