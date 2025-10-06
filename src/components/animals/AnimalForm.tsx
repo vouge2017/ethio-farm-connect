@@ -149,7 +149,7 @@ export const AnimalForm = ({
               <Input
                 id="birth_date"
                 type="date"
-                value={formData.birth_date || ''}
+                value={formData.birth_date}
                 onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
               />
             </div>
@@ -158,7 +158,7 @@ export const AnimalForm = ({
               <Input
                 id="acquisition_date"
                 type="date"
-                value={formData.acquisition_date || ''}
+                value={formData.acquisition_date}
                 onChange={(e) => setFormData({...formData, acquisition_date: e.target.value})}
               />
             </div>
