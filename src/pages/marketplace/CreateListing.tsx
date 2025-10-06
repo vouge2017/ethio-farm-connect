@@ -13,6 +13,7 @@ import { ArrowLeft, Upload, Plus } from 'lucide-react';
 import { MediaUpload } from '@/components/media/MediaUpload';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { animalTypes, getAnimalIcon } from '@/lib/animalHelpers';
 
 interface Animal {
   id: string;
@@ -175,13 +176,13 @@ export default function CreateListing() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cattle">Cattle</SelectItem>
-                      <SelectItem value="goat">Goat</SelectItem>
-                      <SelectItem value="sheep">Sheep</SelectItem>
-                      <SelectItem value="chicken">Chicken</SelectItem>
-                      <SelectItem value="camel">Camel</SelectItem>
-                    </SelectContent>
+                        <SelectContent className="bg-background">
+                          {animalTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {getAnimalIcon(type.value)} {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
@@ -396,12 +397,12 @@ export default function CreateListing() {
                               <SelectTrigger>
                                 <SelectValue placeholder="Select type" />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="cattle">Cattle</SelectItem>
-                                <SelectItem value="goat">Goat</SelectItem>
-                                <SelectItem value="sheep">Sheep</SelectItem>
-                                <SelectItem value="chicken">Chicken</SelectItem>
-                                <SelectItem value="camel">Camel</SelectItem>
+                              <SelectContent className="bg-background">
+                                {animalTypes.map((type) => (
+                                  <SelectItem key={type.value} value={type.value}>
+                                    {getAnimalIcon(type.value)} {type.label}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                           </div>

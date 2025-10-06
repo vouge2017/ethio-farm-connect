@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { animalTypes, getAnimalIcon } from '@/lib/animalHelpers';
+import { animalTypes, getAnimalIcon, breedsByAnimalType } from '@/lib/animalHelpers';
 import type { AnimalFormData } from '@/hooks/useAnimals';
 import type { AnimalType, AnimalGender } from '@/lib/animalHelpers';
 import type { Database } from '@/integrations/supabase/types';
@@ -60,9 +60,11 @@ export const AnimalForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.type) return;
+    if (!formData.type) return;
     onSubmit(formData);
   };
+
+  const availableBreeds = breedsByAnimalType[formData.type] || [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -76,13 +78,12 @@ export const AnimalForm = ({
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Animal Name *</Label>
+            <Label htmlFor="name">Animal Name (Optional)</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              placeholder="Enter animal name"
-              required
+              placeholder="Enter animal name (optional)"
             />
           </div>
 
@@ -108,27 +109,35 @@ export const AnimalForm = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="breed">Breed</Label>
-              <Input
-                id="breed"
-                value={formData.breed}
-                onChange={(e) => setFormData({...formData, breed: e.target.value})}
-                placeholder="e.g., Holstein"
-              />
+              <Select 
+                value={formData.breed} 
+                onValueChange={(value) => setFormData({...formData, breed: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select breed" />
+                </SelectTrigger>
+                <SelectContent className="bg-background">
+                  {availableBreeds.map((breed) => (
+                    <SelectItem key={breed} value={breed}>
+                      {breed}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
+              <Label htmlFor="gender">Gender *</Label>
               <Select 
                 value={formData.gender} 
                 onValueChange={(value: AnimalGender) => setFormData({...formData, gender: value})}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background">
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="unknown">Unknown</SelectItem>
                 </SelectContent>
               </Select>
             </div>

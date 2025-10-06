@@ -867,7 +867,7 @@ export type Database = {
       }
     }
     Enums: {
-      animal_gender: "male" | "female" | "unknown"
+      animal_gender: "male" | "female"
       animal_type:
         | "cattle"
         | "goat"
@@ -1025,7 +1025,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      animal_gender: ["male", "female", "unknown"],
+      animal_gender: ["male", "female"],
       animal_type: [
         "cattle",
         "goat",
