@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children, activeTab }: MainLayoutProps) {
   const { profile, signOut } = useAuth();
+  const { roles } = useUserRole();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const location = useLocation();
 
@@ -96,9 +98,8 @@ export default function MainLayout({ children, activeTab }: MainLayoutProps) {
               <div className="flex items-center gap-2">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium">{profile?.display_name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {profile?.role === 'farmer' ? 'Farmer' : 
-                     profile?.role === 'vet' ? 'Veterinarian' : 'Admin'}
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {roles.map(r => r.role).join(', ')}
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" className="p-2">

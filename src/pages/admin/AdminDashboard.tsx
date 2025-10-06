@@ -17,6 +17,11 @@ import {
   Ban,
   MessageSquare 
 } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type UserRole = { role: Database['public']['Enums']['app_role'] };
+type ProfileWithRoles = Profile & { user_roles: UserRole[] };
 
 interface AdminStats {
   totalUsers: number;
@@ -37,7 +42,7 @@ export default function AdminDashboard() {
     reportedContent: 0
   });
   const [listings, setListings] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<ProfileWithRoles[]>([]);
 
   useEffect(() => {
     // Wait for both auth and role to load
@@ -86,11 +91,11 @@ export default function AdminDashboard() {
       // Fetch recent users
       const { data: recentUsers } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, user_roles(role)')
         .order('created_at', { ascending: false })
         .limit(20);
 
-      setUsers(recentUsers || []);
+      setUsers((recentUsers as ProfileWithRoles[]) || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -295,7 +300,9 @@ export default function AdminDashboard() {
                       <h3 className="font-medium">{user.display_name}</h3>
                       <p className="text-sm text-muted-foreground">{user.phone_number}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary">{user.role}</Badge>
+                        {user.user_roles?.map(({ role }) => (
+                          <Badge key={role} variant="secondary">{role}</Badge>
+                        ))}
                         <span className="text-xs text-muted-foreground">
                           Joined: {new Date(user.created_at).toLocaleDateString()}
                         </span>

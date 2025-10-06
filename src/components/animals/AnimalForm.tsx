@@ -20,6 +20,12 @@ interface AnimalFormProps {
   isLoading?: boolean;
 }
 
+const formatDateForInput = (date: string | null | undefined): string => {
+  if (!date) return '';
+  // Handles both 'YYYY-MM-DD' and full ISO strings by taking the first part.
+  return date.split('T')[0];
+};
+
 export const AnimalForm = ({ 
   open, 
   onOpenChange, 
@@ -33,6 +39,7 @@ export const AnimalForm = ({
     breed: '',
     gender: 'unknown' as AnimalGender,
     birth_date: '',
+    acquisition_date: '',
     notes: ''
   });
 
@@ -43,7 +50,8 @@ export const AnimalForm = ({
         type: editingAnimal.type as AnimalType,
         breed: editingAnimal.breed || '',
         gender: editingAnimal.gender as AnimalGender,
-        birth_date: editingAnimal.birth_date || '',
+        birth_date: formatDateForInput(editingAnimal.birth_date),
+        acquisition_date: formatDateForInput(editingAnimal.acquisition_date),
         notes: editingAnimal.notes || ''
       });
     } else {
@@ -53,6 +61,7 @@ export const AnimalForm = ({
         breed: '',
         gender: 'unknown' as AnimalGender,
         birth_date: '',
+        acquisition_date: '',
         notes: ''
       });
     }
@@ -134,14 +143,25 @@ export const AnimalForm = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="birth_date">Birth Date</Label>
-            <Input
-              id="birth_date"
-              type="date"
-              value={formData.birth_date}
-              onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="birth_date">Birth Date</Label>
+              <Input
+                id="birth_date"
+                type="date"
+                value={formData.birth_date || ''}
+                onChange={(e) => setFormData({...formData, birth_date: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="acquisition_date">Acquisition Date</Label>
+              <Input
+                id="acquisition_date"
+                type="date"
+                value={formData.acquisition_date || ''}
+                onChange={(e) => setFormData({...formData, acquisition_date: e.target.value})}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

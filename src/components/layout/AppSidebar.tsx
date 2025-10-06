@@ -1,6 +1,7 @@
 import { Heart, Store, MessageCircle, User, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Sidebar,
   SidebarContent,
@@ -44,6 +45,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { profile, signOut } = useAuth();
+  const { roles } = useUserRole();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
 
@@ -109,9 +111,8 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="text-center mb-3">
               <p className="text-sm font-medium">{profile?.display_name}</p>
-              <p className="text-xs text-muted-foreground">
-                {profile?.role === 'farmer' ? 'Farmer' : 
-                 profile?.role === 'vet' ? 'Veterinarian' : 'Admin'}
+              <p className="text-xs text-muted-foreground capitalize">
+                {roles.map(r => r.role).join(', ')}
               </p>
             </div>
           )}
