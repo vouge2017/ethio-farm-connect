@@ -41,7 +41,7 @@ interface Answer {
   created_at: string;
   profiles?: {
     display_name: string;
-    user_roles: { role: string }[];
+    role: string;
   };
 }
 
@@ -101,10 +101,7 @@ export default function Community() {
         .from('answers')
         .select(`
           *,
-          profiles!answers_author_id_fkey(
-            display_name,
-            user_roles(role)
-          )
+          profiles!answers_author_id_fkey(display_name, role)
         `)
         .eq('question_id', questionId)
         .order('created_at', { ascending: true });
@@ -311,33 +308,30 @@ export default function Community() {
             Answers ({answers.length})
           </h3>
           
-          {answers.map((answer) => {
-            const isVet = answer.profiles?.user_roles?.some(r => r.role === 'vet');
-            return (
-              <Card key={answer.id} className={isVet ? 'border-l-4 border-l-accent' : ''}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{answer.profiles?.display_name || 'Anonymous'}</span>
-                      {isVet && (
-                        <Badge variant="destructive">Veterinarian</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{new Date(answer.created_at).toLocaleDateString()}</span>
-                      <Button variant="ghost" size="sm" className="gap-1">
-                        <ThumbsUp className="h-3 w-3" />
-                        {answer.helpful_count}
-                      </Button>
-                    </div>
+          {answers.map((answer) => (
+            <Card key={answer.id} className={answer.is_vet_answer ? 'border-l-4 border-l-accent' : ''}>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{answer.profiles?.display_name || 'Anonymous'}</span>
+                    {answer.is_vet_answer && (
+                      <Badge variant="destructive">Veterinarian</Badge>
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p>{answer.content}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{new Date(answer.created_at).toLocaleDateString()}</span>
+                    <Button variant="ghost" size="sm" className="gap-1">
+                      <ThumbsUp className="h-3 w-3" />
+                      {answer.helpful_count}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>{answer.content}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Add Answer Form */}

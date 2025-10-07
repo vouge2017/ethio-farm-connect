@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserRole } from '@/hooks/useUserRole';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +12,8 @@ import {
   User, 
   LogOut,
   Menu,
-  Bell
+  Bell,
+  Lightbulb
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -24,7 +24,6 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children, activeTab }: MainLayoutProps) {
   const { profile, signOut } = useAuth();
-  const { roles } = useUserRole();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const location = useLocation();
 
@@ -52,6 +51,14 @@ export default function MainLayout({ children, activeTab }: MainLayoutProps) {
       icon: MessageCircle,
       href: '/community',
       color: 'text-accent'
+    },
+    {
+      id: 'dailytips',
+      name: 'ዕለታዊ ምክሮች',
+      nameEn: 'Daily Tips',
+      icon: Lightbulb,
+      href: '/daily-tips',
+      color: 'text-green-500'
     }
   ];
 
@@ -98,8 +105,9 @@ export default function MainLayout({ children, activeTab }: MainLayoutProps) {
               <div className="flex items-center gap-2">
                 <div className="hidden sm:block text-right">
                   <p className="text-sm font-medium">{profile?.display_name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {roles.map(r => r.role).join(', ')}
+                  <p className="text-xs text-muted-foreground">
+                    {profile?.role === 'farmer' ? 'Farmer' :
+                     profile?.role === 'vet' ? 'Veterinarian' : 'Admin'}
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" className="p-2">

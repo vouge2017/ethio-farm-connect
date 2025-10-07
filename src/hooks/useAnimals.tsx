@@ -16,7 +16,6 @@ export interface AnimalFormData {
   breed?: string;
   gender: AnimalGender;
   birth_date?: string;
-  acquisition_date?: string;
   notes?: string;
 }
 
@@ -69,7 +68,6 @@ export const useCreateAnimal = () => {
         breed: formData.breed || null,
         gender: formData.gender,
         birth_date: formData.birth_date || null,
-        acquisition_date: formData.acquisition_date || null,
         notes: formData.notes || null,
       };
 
@@ -113,7 +111,6 @@ export const useUpdateAnimal = () => {
         breed: data.breed || null,
         gender: data.gender,
         birth_date: data.birth_date || null,
-        acquisition_date: data.acquisition_date || null,
         notes: data.notes || null,
       };
 
