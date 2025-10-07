@@ -24,43 +24,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer profile fetching to prevent deadlocks
-          setTimeout(async () => {
-            try {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .single();
-              setProfile(profileData);
-            } catch (error) {
-              console.error('Error fetching profile:', error);
-            }
-          }, 0);
-        } else {
-          setProfile(null);
-        }
-        
-        setLoading(false);
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // The listener fires immediately with the current session, so we don't need getSession()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setLoading(true);
       setSession(session);
       setUser(session?.user ?? null);
+
+      if (session?.user) {
+        try {
+          const { data: profileData, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+
+          // PGRST116 means no rows found, which is a valid state (e.g., profile not created yet)
+          if (error && error.code !== 'PGRST116') {
+            throw error;
+          }
+
+          setProfile(profileData || null);
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          toast({
+            title: 'Error fetching profile',
+            description: 'There was a problem loading your profile data.',
+            variant: 'destructive',
+          });
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [toast]);
 
   const signUp = async (phoneNumber: string, displayName: string, preferredChannel: 'sms' | 'telegram') => {
     try {
