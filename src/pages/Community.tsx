@@ -13,192 +13,74 @@ import { Plus, MessageSquare, Eye, User, Calendar, ThumbsUp } from 'lucide-react
 import { useToast } from '@/hooks/use-toast';
 import { MediaUpload } from '@/components/media/MediaUpload';
 
-interface Question {
-  id: string;
-  title: string;
-  content: string;
-  animal_type?: string;
-  status: 'open' | 'answered' | 'closed';
-  view_count: number;
-  photos?: string[];
-  audio_url?: string;
-  author_id: string;
-  created_at: string;
-  updated_at: string;
-  profiles?: {
-    display_name: string;
-  };
-  answers?: { count: number }[];
-}
-
-interface Answer {
-  id: string;
-  content: string;
-  question_id: string;
-  author_id: string;
-  is_vet_answer: boolean;
-  helpful_count: number;
-  created_at: string;
-  profiles?: {
-    display_name: string;
-    role: string;
-  };
-}
+import {
+  useQuestions,
+  useAnswers,
+  useCreateQuestion,
+  useCreateAnswer,
+  useIncrementViewCount,
+  usePostAiAnswer,
+  QuestionFormData,
+  Question,
+  Answer
+} from '@/hooks/useCommunity';
 
 type AnimalType = 'cattle' | 'goat' | 'sheep' | 'chicken' | 'camel' | 'donkey' | 'horse';
 
 export default function Community() {
-  const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
-  const [answers, setAnswers] = useState<Answer[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showNewQuestion, setShowNewQuestion] = useState(false);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [newAnswer, setNewAnswer] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
-  const [questionForm, setQuestionForm] = useState({
+  const [questionForm, setQuestionForm] = useState<QuestionFormData>({
     title: '',
     content: '',
-    animal_type: '' as AnimalType | '',
-    photos: [] as string[]
+    animal_type: '',
+    photos: []
   });
   
   const { user } = useAuth();
+
+  // Refactored data fetching with React Query hooks
+  const { data: questions = [], isLoading: questionsLoading } = useQuestions();
+  const { data: answers = [] } = useAnswers(selectedQuestion?.id || null);
+
   const { toast } = useToast();
+  const createQuestion = useCreateQuestion();
+  const createAnswer = useCreateAnswer();
+  const incrementViewCountMutation = useIncrementViewCount();
+  const postAiAnswer = usePostAiAnswer();
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
-
-  const fetchQuestions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('questions')
-        .select(`
-          *,
-          profiles!questions_author_id_fkey(display_name),
-          answers(count)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setQuestions(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAnswers = async (questionId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('answers')
-        .select(`
-          *,
-          profiles!answers_author_id_fkey(display_name, role)
-        `)
-        .eq('question_id', questionId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setAnswers(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleCreateQuestion = async (e: React.FormEvent) => {
+  const handleCreateQuestion = (e: React.FormEvent) => {
     e.preventDefault();
     if (!questionForm.title || !questionForm.content) return;
 
-    try {
-      const { error } = await supabase
-        .from('questions')
-        .insert({
-          title: questionForm.title,
-          content: questionForm.content,
-          animal_type: questionForm.animal_type || null,
-          photos: questionForm.photos.length > 0 ? questionForm.photos : null,
-          author_id: user?.id!
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Question posted successfully!"
-      });
-
-      setQuestionForm({
-        title: '',
-        content: '',
-        animal_type: '',
-        photos: []
-      });
-      setShowNewQuestion(false);
-      fetchQuestions();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
+    createQuestion.mutate(questionForm, {
+      onSuccess: (newQuestion) => {
+        setQuestionForm({ title: '', content: '', animal_type: '', photos: [] });
+        setShowNewQuestion(false);
+        // Trigger the AI bot after the question is successfully created
+        postAiAnswer.mutate(newQuestion.id);
+      }
+    });
   };
 
-  const handleCreateAnswer = async (e: React.FormEvent) => {
+  const handleCreateAnswer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAnswer || !selectedQuestion) return;
 
-    try {
-      const { error } = await supabase
-        .from('answers')
-        .insert({
-          content: newAnswer,
-          question_id: selectedQuestion.id,
-          author_id: user?.id!
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Answer posted successfully!"
-      });
-
-      setNewAnswer('');
-      fetchAnswers(selectedQuestion.id);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  };
-
-  const incrementViewCount = async (questionId: string) => {
-    // Update view count directly since RPC function doesn't exist yet
-    await supabase
-      .from('questions')
-      .update({ view_count: questions.find(q => q.id === questionId)?.view_count + 1 || 1 })
-      .eq('id', questionId);
+    createAnswer.mutate({ questionId: selectedQuestion.id, content: newAnswer }, {
+      onSuccess: () => {
+        setNewAnswer('');
+      }
+    });
   };
 
   const handleQuestionClick = (question: Question) => {
     setSelectedQuestion(question);
-    fetchAnswers(question.id);
-    incrementViewCount(question.id);
+    incrementViewCountMutation.mutate(question.id);
   };
 
   const handlePhotoUpload = (urls: string[]) => {
