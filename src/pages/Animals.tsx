@@ -6,6 +6,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { AnimalCard } from '@/components/animals/AnimalCard';
 import { AnimalForm } from '@/components/animals/AnimalForm';
 import { AnimalPhotoDialog } from '@/components/animals/AnimalPhotoDialog';
+import { HealthRecordsDialog } from '@/components/animals/HealthRecordsDialog';
+import { MilkProductionDialog } from '@/components/animals/MilkProductionDialog';
 import { useAnimals, useCreateAnimal, useUpdateAnimal, useDeleteAnimal, useUpdateAnimalPhotos } from '@/hooks/useAnimals';
 import type { AnimalFormData } from '@/hooks/useAnimals';
 import type { Database } from '@/integrations/supabase/types';
@@ -17,6 +19,8 @@ export default function Animals() {
   const [editingAnimal, setEditingAnimal] = useState<Animal | null>(null);
   const [showPhotoDialog, setShowPhotoDialog] = useState<{ animalId: string; photos: string[] } | null>(null);
   const [deleteDialogAnimalId, setDeleteDialogAnimalId] = useState<string | null>(null);
+  const [healthRecordsDialog, setHealthRecordsDialog] = useState<{ animalId: string; animalName: string } | null>(null);
+  const [milkProductionDialog, setMilkProductionDialog] = useState<{ animalId: string; animalName: string } | null>(null);
 
   const { data: animals = [], isLoading } = useAnimals();
   const createAnimal = useCreateAnimal();
@@ -159,6 +163,8 @@ export default function Animals() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onPhotoUpload={handlePhotoUpload}
+              onHealthRecords={(id, name) => setHealthRecordsDialog({ animalId: id, animalName: name })}
+              onMilkProduction={(id, name) => setMilkProductionDialog({ animalId: id, animalName: name })}
             />
           ))}
         </div>
@@ -201,6 +207,24 @@ export default function Animals() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {healthRecordsDialog && (
+        <HealthRecordsDialog
+          open={true}
+          onOpenChange={(open) => !open && setHealthRecordsDialog(null)}
+          animalId={healthRecordsDialog.animalId}
+          animalName={healthRecordsDialog.animalName}
+        />
+      )}
+
+      {milkProductionDialog && (
+        <MilkProductionDialog
+          open={true}
+          onOpenChange={(open) => !open && setMilkProductionDialog(null)}
+          animalId={milkProductionDialog.animalId}
+          animalName={milkProductionDialog.animalName}
+        />
+      )}
     </div>
   );
 }

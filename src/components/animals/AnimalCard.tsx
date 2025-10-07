@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, Activity, Calendar, Edit, Camera, Trash2 } from 'lucide-react';
+import { Heart, Activity, Calendar, Edit, Camera, Trash2, Stethoscope, Milk } from 'lucide-react';
 import { getAnimalIcon, calculateAge, formatDate } from '@/lib/animalHelpers';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -12,9 +12,11 @@ interface AnimalCardProps {
   onEdit: (animal: Animal) => void;
   onDelete: (animalId: string) => void;
   onPhotoUpload: (animalId: string) => void;
+  onHealthRecords?: (animalId: string, animalName: string) => void;
+  onMilkProduction?: (animalId: string, animalName: string) => void;
 }
 
-export const AnimalCard = ({ animal, onEdit, onDelete, onPhotoUpload }: AnimalCardProps) => {
+export const AnimalCard = ({ animal, onEdit, onDelete, onPhotoUpload, onHealthRecords, onMilkProduction }: AnimalCardProps) => {
   return (
     <Card 
       className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-l-4 border-l-primary/20 hover:border-l-primary"
@@ -88,35 +90,63 @@ export const AnimalCard = ({ animal, onEdit, onDelete, onPhotoUpload }: AnimalCa
           </div>
         )}
         
-        <div className="flex gap-2 pt-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 gap-1"
-            onClick={() => onEdit(animal)}
-          >
-            <Edit className="h-3 w-3" />
-            Edit
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1 gap-1"
-            onClick={() => onPhotoUpload(animal.id)}
-          >
-            <Camera className="h-3 w-3" />
-            Photos
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-            onClick={() => onDelete(animal.id)}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+        <div className="space-y-2 pt-2">
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 gap-1"
+              onClick={() => onEdit(animal)}
+            >
+              <Edit className="h-3 w-3" />
+              Edit
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 gap-1"
+              onClick={() => onPhotoUpload(animal.id)}
+            >
+              <Camera className="h-3 w-3" />
+              Photos
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-1 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              onClick={() => onDelete(animal.id)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+
+          <div className="flex gap-2">
+            {onHealthRecords && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-1"
+                onClick={() => onHealthRecords(animal.id, animal.name || animal.animal_id)}
+              >
+                <Stethoscope className="h-3 w-3" />
+                Health
+              </Button>
+            )}
+            
+            {onMilkProduction && ['cow', 'cattle'].includes(animal.type) && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 gap-1"
+                onClick={() => onMilkProduction(animal.id, animal.name || animal.animal_id)}
+              >
+                <Milk className="h-3 w-3" />
+                Milk
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
