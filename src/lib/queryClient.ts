@@ -57,9 +57,4 @@ export const QUERY_KEYS = {
   // Admin
   adminUsers: ['admin', 'users'] as const,
   adminListings: ['admin', 'listings'] as const,
-
-  // Community
-  questions: ['questions'] as const,
-  question: (id: string) => ['questions', id] as const,
-  answers: (questionId: string) => ['answers', questionId] as const,
 } as const;
