@@ -71,46 +71,27 @@ export const NotificationCenter = () => {
     if (!user) return;
 
     try {
-      // Since notifications table doesn't exist yet, use mock data
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          type: 'message',
-          title: 'New Message',
-          message: 'You have a new message about your Holstein cow listing',
-          read: false,
-          created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          metadata: { sender_name: 'Ahmed Mohammed', listing_id: 'YG-2017-001234' }
-        },
-        {
-          id: '2',
-          type: 'listing_update',
-          title: 'Listing Approved',
-          message: 'Your Holstein cow listing has been approved and is now live',
-          read: false,
-          created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          metadata: { listing_id: 'YG-2017-001234' }
-        },
-        {
-          id: '3',
-          type: 'verification',
-          title: 'Verification Pending',
-          message: 'Your premium verification is under review',
-          read: true,
-          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '4',
-          type: 'system',
-          title: 'Welcome!',
-          message: 'Welcome to YegnaBeretLij Marketplace. Start by creating your first listing.',
-          read: true,
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-        }
-      ];
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      setNotifications(mockNotifications);
-      setUnreadCount(mockNotifications.filter(n => !n.read).length);
+      if (error) throw error;
+
+      const formattedNotifications: Notification[] = (data || []).map(n => ({
+        id: n.id,
+        type: n.type as Notification['type'],
+        title: n.title,
+        message: n.message,
+        read: n.read,
+        created_at: n.created_at,
+        metadata: n.metadata
+      }));
+
+      setNotifications(formattedNotifications);
+      setUnreadCount(formattedNotifications.filter(n => !n.read).length);
     } catch (error: any) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -125,11 +106,10 @@ export const NotificationCenter = () => {
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
 
-      // Update in database when implemented
-      // await supabase
-      //   .from('notifications')
-      //   .update({ read: true })
-      //   .eq('id', notificationId);
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
     } catch (error: any) {
       console.error('Failed to mark notification as read:', error);
     }
@@ -140,11 +120,12 @@ export const NotificationCenter = () => {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
 
-      // Update in database when implemented
-      // await supabase
-      //   .from('notifications')
-      //   .update({ read: true })
-      //   .eq('user_id', user?.id);
+      if (user) {
+        await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('user_id', user.id);
+      }
     } catch (error: any) {
       console.error('Failed to mark all notifications as read:', error);
     }
@@ -154,11 +135,10 @@ export const NotificationCenter = () => {
     try {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       
-      // Delete from database when implemented
-      // await supabase
-      //   .from('notifications')
-      //   .delete()
-      //   .eq('id', notificationId);
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
     } catch (error: any) {
       console.error('Failed to delete notification:', error);
     }
