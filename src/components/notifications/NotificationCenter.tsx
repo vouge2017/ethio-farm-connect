@@ -13,16 +13,13 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
   id: string;
-  type: 'message' | 'listing_update' | 'system' | 'verification';
+  type: string;
   title: string;
   message: string;
   read: boolean;
   created_at: string;
-  metadata?: {
-    listing_id?: string;
-    conversation_id?: string;
-    sender_name?: string;
-  };
+  metadata?: any;
+  user_id: string;
 }
 
 export const NotificationCenter = () => {
@@ -80,18 +77,8 @@ export const NotificationCenter = () => {
 
       if (error) throw error;
 
-      const formattedNotifications: Notification[] = (data || []).map(n => ({
-        id: n.id,
-        type: n.type as Notification['type'],
-        title: n.title,
-        message: n.message,
-        read: n.read,
-        created_at: n.created_at,
-        metadata: n.metadata
-      }));
-
-      setNotifications(formattedNotifications);
-      setUnreadCount(formattedNotifications.filter(n => !n.read).length);
+      setNotifications(data || []);
+      setUnreadCount(data?.filter(n => !n.read).length || 0);
     } catch (error: any) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -99,33 +86,38 @@ export const NotificationCenter = () => {
 
   const markAsRead = async (notificationId: string) => {
     try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId);
+
+      if (error) throw error;
+
       setNotifications(prev => 
         prev.map(n => 
           n.id === notificationId ? { ...n, read: true } : n
         )
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
-
-      await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
     } catch (error: any) {
       console.error('Failed to mark notification as read:', error);
     }
   };
 
   const markAllAsRead = async () => {
+    if (!user) return;
+
     try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false);
+
+      if (error) throw error;
+
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-
-      if (user) {
-        await supabase
-          .from('notifications')
-          .update({ read: true })
-          .eq('user_id', user.id);
-      }
     } catch (error: any) {
       console.error('Failed to mark all notifications as read:', error);
     }
@@ -133,12 +125,18 @@ export const NotificationCenter = () => {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      
-      await supabase
+      const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId);
+
+      if (error) throw error;
+
+      const deletedNotif = notifications.find(n => n.id === notificationId);
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      if (deletedNotif && !deletedNotif.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error: any) {
       console.error('Failed to delete notification:', error);
     }

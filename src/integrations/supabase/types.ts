@@ -348,6 +348,47 @@ export type Database = {
           },
         ]
       }
+      listing_analytics: {
+        Row: {
+          contact_clicks: number | null
+          created_at: string
+          date: string
+          id: string
+          listing_id: string
+          message_starts: number | null
+          unique_viewers: number | null
+          views_count: number | null
+        }
+        Insert: {
+          contact_clicks?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          listing_id: string
+          message_starts?: number | null
+          unique_viewers?: number | null
+          views_count?: number | null
+        }
+        Update: {
+          contact_clicks?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          listing_id?: string
+          message_starts?: number | null
+          unique_viewers?: number | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_analytics_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           animal_id: string | null
@@ -590,6 +631,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       otp_logs: {
         Row: {
           attempts: number | null
@@ -755,6 +829,56 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          documents: Json | null
+          id: string
+          listing_id: string
+          requester_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          tier: Database["public"]["Enums"]["verification_tier"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          listing_id: string
+          requester_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tier: Database["public"]["Enums"]["verification_tier"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          documents?: Json | null
+          id?: string
+          listing_id?: string
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          tier?: Database["public"]["Enums"]["verification_tier"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vet_profiles: {
         Row: {
           available_hours: string | null
@@ -847,6 +971,16 @@ export type Database = {
         Args: { profile_user_id: string; viewer_id: string }
         Returns: boolean
       }
+      create_notification: {
+        Args: {
+          p_message: string
+          p_metadata?: Json
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       generate_animal_id: {
         Args: {
           animal_type_param: Database["public"]["Enums"]["animal_type"]
@@ -864,6 +998,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      track_listing_view: {
+        Args: { p_listing_id: string; p_viewer_id?: string }
+        Returns: undefined
       }
     }
     Enums: {
