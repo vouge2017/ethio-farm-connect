@@ -13,6 +13,17 @@ interface AnalyticsData {
   message_starts: number;
 }
 
+interface ListingAnalyticsRow {
+  id: string;
+  listing_id: string;
+  date: string;
+  views_count: number;
+  unique_viewers: number;
+  contact_clicks: number;
+  message_starts: number;
+  created_at: string;
+}
+
 interface ListingAnalyticsChartProps {
   listingId: string;
 }
@@ -43,7 +54,7 @@ export const ListingAnalyticsChart = ({ listingId }: ListingAnalyticsChartProps)
 
       if (error) throw error;
 
-      const formattedData: AnalyticsData[] = (data || []).map(item => ({
+      const formattedData: AnalyticsData[] = ((data as unknown as ListingAnalyticsRow[]) || []).map(item => ({
         date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         views_count: item.views_count || 0,
         unique_viewers: item.unique_viewers || 0,

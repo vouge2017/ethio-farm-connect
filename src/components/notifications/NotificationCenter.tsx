@@ -13,13 +13,13 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
   id: string;
+  user_id: string;
   type: string;
   title: string;
   message: string;
   read: boolean;
-  created_at: string;
   metadata?: any;
-  user_id: string;
+  created_at: string;
 }
 
 export const NotificationCenter = () => {
@@ -77,8 +77,8 @@ export const NotificationCenter = () => {
 
       if (error) throw error;
 
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.read).length || 0);
+      setNotifications((data as unknown as Notification[]) || []);
+      setUnreadCount(data?.filter((n: any) => !n.read).length || 0);
     } catch (error: any) {
       console.error('Failed to fetch notifications:', error);
     }

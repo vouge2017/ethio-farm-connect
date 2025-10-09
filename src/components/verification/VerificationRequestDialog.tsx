@@ -75,7 +75,7 @@ export const VerificationRequestDialog = ({ open, onOpenChange, listingId, curre
           requester_id: user.id,
           tier: selectedTier,
           documents: documents.length > 0 ? { files: documents, notes } : null
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -228,12 +228,22 @@ export const VerificationRequestDialog = ({ open, onOpenChange, listingId, curre
 
       {/* Document Upload Dialog */}
       {showUpload && (
-        <MediaUpload
-          bucketName="listing-photos"
-          onUploadComplete={handleDocumentsUploaded}
-          maxFiles={5}
-          acceptedFileTypes={{ 'image/*': ['.jpg', '.jpeg', '.png', '.pdf'] }}
-        />
+        <Dialog open={showUpload} onOpenChange={setShowUpload}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Upload Verification Documents</DialogTitle>
+              <DialogDescription>
+                Upload your ID, business license, or ownership documents
+              </DialogDescription>
+            </DialogHeader>
+            <MediaUpload
+              bucket="listing-photos"
+              onUpload={handleDocumentsUploaded}
+              maxFiles={5}
+              accept="images"
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );
