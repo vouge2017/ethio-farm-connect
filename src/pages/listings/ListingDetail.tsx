@@ -4,14 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, MapPin, Phone, MessageSquare, Eye, Heart, Calendar, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Phone, MessageSquare, Eye, Heart, Calendar, User, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ListingAnalyticsChart } from '@/components/analytics/ListingAnalyticsChart';
+import { VerificationRequestDialog } from '@/components/verification/VerificationRequestDialog';
 
 interface ListingDetail {
   id: string;
   listing_id: string;
+  seller_id: string;
   title: string;
   description: string;
   price: number;
@@ -44,8 +48,11 @@ export default function ListingDetail() {
   const navigate = useNavigate();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  const isOwner = user && listing && user.id === listing.seller_id;
 
   useEffect(() => {
     if (listingId) {
@@ -129,6 +136,160 @@ export default function ListingDetail() {
     });
   };
 
+  const renderListingContent = () => (
+    <>
+      {/* Images */}
+      <Card>
+        <CardContent className="p-0">
+          <div className="h-64 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center rounded-t-lg">
+            <div className="text-6xl">
+              {getCategoryIcon(listing!.category)}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Details */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-2xl">{listing!.title}</CardTitle>
+              <CardDescription className="flex items-center gap-2 mt-2">
+                <MapPin className="h-4 w-4" />
+                {listing!.location_region}
+                {listing!.location_zone && `, ${listing!.location_zone}`}
+                {listing!.location_woreda && `, ${listing!.location_woreda}`}
+              </CardDescription>
+            </div>
+            {getVerificationBadge(listing!.verification_tier)}
+          </div>
+          
+          <div className="text-3xl font-bold text-primary">
+            {listing!.price.toLocaleString()} ETB
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="font-semibold mb-2">Description</h3>
+            <p className="text-muted-foreground whitespace-pre-wrap">{listing!.description}</p>
+          </div>
+
+          {/* Category-specific attributes */}
+          {listing!.category === 'livestock' && listing!.animal && (
+            <div>
+              <h3 className="font-semibold mb-2">Animal Details</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Type:</span> {listing!.animal.type}
+                </div>
+                <div>
+                  <span className="font-medium">Gender:</span> {listing!.animal.gender}
+                </div>
+                {listing!.animal.breed && (
+                  <div>
+                    <span className="font-medium">Breed:</span> {listing!.animal.breed}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {listing!.attributes && Object.keys(listing!.attributes).length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-2">Additional Details</h3>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                {Object.entries(listing!.attributes).map(([key, value]) => (
+                  <div key={key}>
+                    <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> {value as string}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <Separator />
+          
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              Posted on {formatDate(listing!.created_at)}
+            </div>
+            <div className="flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              {listing!.view_count} views
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+
+  const renderSidebar = () => (
+    <div className="space-y-4">
+      {/* Seller Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Seller Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <div className="font-semibold">{listing!.seller.display_name}</div>
+            <div className="text-sm text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {listing!.seller.location_region}
+            </div>
+          </div>
+          
+          <Separator />
+          
+          <div className="space-y-2">
+            {listing!.contact_phone && (
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <Phone className="h-4 w-4" />
+                {listing!.contact_phone}
+              </Button>
+            )}
+            
+            {listing!.contact_telegram && (
+              <Button variant="outline" className="w-full justify-start gap-2">
+                <MessageSquare className="h-4 w-4" />
+                @{listing!.contact_telegram}
+              </Button>
+            )}
+            
+            <Button className="w-full gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Contact Seller
+            </Button>
+            
+            <Button variant="outline" className="w-full gap-2">
+              <Heart className="h-4 w-4" />
+              Save to Favorites
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Safety Tips */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Safety Tips</CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-muted-foreground space-y-2">
+          <p>• Meet in a public place for transactions</p>
+          <p>• Inspect the item before payment</p>
+          <p>• Be cautious of unusually low prices</p>
+          <p>• Report suspicious listings</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="container mx-auto p-4 max-w-4xl">
@@ -156,169 +317,63 @@ export default function ListingDetail() {
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="container mx-auto p-4 max-w-6xl">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Marketplace
-        </Button>
-        <Badge variant="secondary">{listing.category}</Badge>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Marketplace
+          </Button>
+          <Badge variant="secondary">{listing.category}</Badge>
+        </div>
+        {isOwner && listing.verification_tier === 'free' && (
+          <Button onClick={() => setVerificationDialogOpen(true)} className="gap-2">
+            <Shield className="h-4 w-4" />
+            Request Verification
+          </Button>
+        )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Images */}
-          <Card>
-            <CardContent className="p-0">
-              <div className="h-64 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center rounded-t-lg">
-                <div className="text-6xl">
-                  {getCategoryIcon(listing.category)}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      {isOwner ? (
+        <Tabs defaultValue="details" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="details">Listing Details</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
 
-          {/* Details */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-2xl">{listing.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-2 mt-2">
-                    <MapPin className="h-4 w-4" />
-                    {listing.location_region}
-                    {listing.location_zone && `, ${listing.location_zone}`}
-                    {listing.location_woreda && `, ${listing.location_woreda}`}
-                  </CardDescription>
-                </div>
-                {getVerificationBadge(listing.verification_tier)}
+          <TabsContent value="details">
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {renderListingContent()}
               </div>
-              
-              <div className="text-3xl font-bold text-primary">
-                {listing.price.toLocaleString()} ETB
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{listing.description}</p>
-              </div>
+              {/* Sidebar */}
+              {renderSidebar()}
+            </div>
+          </TabsContent>
 
-              {/* Category-specific attributes */}
-              {listing.category === 'livestock' && listing.animal && (
-                <div>
-                  <h3 className="font-semibold mb-2">Animal Details</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Type:</span> {listing.animal.type}
-                    </div>
-                    <div>
-                      <span className="font-medium">Gender:</span> {listing.animal.gender}
-                    </div>
-                    {listing.animal.breed && (
-                      <div>
-                        <span className="font-medium">Breed:</span> {listing.animal.breed}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {listing.attributes && Object.keys(listing.attributes).length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-2">Additional Details</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {Object.entries(listing.attributes).map(([key, value]) => (
-                      <div key={key}>
-                        <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> {value as string}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <Separator />
-              
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Posted on {formatDate(listing.created_at)}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="h-4 w-4" />
-                  {listing.view_count} views
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TabsContent value="analytics">
+            <ListingAnalyticsChart listingId={listing.id} />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {renderListingContent()}
+          </div>
+          {/* Sidebar */}
+          {renderSidebar()}
         </div>
+      )}
 
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* Seller Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Seller Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <div className="font-semibold">{listing.seller.display_name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {listing.seller.location_region}
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                {listing.contact_phone && (
-                  <Button variant="outline" className="w-full justify-start gap-2">
-                    <Phone className="h-4 w-4" />
-                    {listing.contact_phone}
-                  </Button>
-                )}
-                
-                {listing.contact_telegram && (
-                  <Button variant="outline" className="w-full justify-start gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    @{listing.contact_telegram}
-                  </Button>
-                )}
-                
-                <Button className="w-full gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Contact Seller
-                </Button>
-                
-                <Button variant="outline" className="w-full gap-2">
-                  <Heart className="h-4 w-4" />
-                  Save to Favorites
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Safety Tips */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Safety Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="text-xs text-muted-foreground space-y-2">
-              <p>• Meet in a public place for transactions</p>
-              <p>• Inspect the item before payment</p>
-              <p>• Be cautious of unusually low prices</p>
-              <p>• Report suspicious listings</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <VerificationRequestDialog
+        open={verificationDialogOpen}
+        onOpenChange={setVerificationDialogOpen}
+        listingId={listing.id}
+        currentTier={listing.verification_tier}
+      />
     </div>
   );
 }

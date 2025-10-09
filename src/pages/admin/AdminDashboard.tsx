@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   });
   const [listings, setListings] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [verificationRequests, setVerificationRequests] = useState<any[]>([]);
 
   useEffect(() => {
     // Wait for both auth and role to load
@@ -91,6 +92,18 @@ export default function AdminDashboard() {
         .limit(20);
 
       setUsers(recentUsers || []);
+
+      // Fetch verification requests
+      const { data: requests } = await supabase
+        .from('verification_requests')
+        .select(`
+          *,
+          listing:listings(title, listing_id, seller_id),
+          requester:profiles!verification_requests_requester_id_fkey(display_name, phone_number)
+        `)
+        .order('created_at', { ascending: false });
+
+      setVerificationRequests(requests || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -138,6 +151,61 @@ export default function AdminDashboard() {
       toast({
         title: "Error",
         description: `Failed to ${action} user`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleVerificationAction = async (requestId: string, action: 'approve' | 'reject') => {
+    try {
+      const request = verificationRequests.find(r => r.id === requestId);
+      if (!request) return;
+
+      // Update verification request
+      const { error: requestError } = await supabase
+        .from('verification_requests')
+        .update({
+          status: action === 'approve' ? 'approved' : 'rejected',
+          reviewed_by: user?.id,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (requestError) throw requestError;
+
+      // Update listing verification tier if approved
+      if (action === 'approve') {
+        const { error: listingError } = await supabase
+          .from('listings')
+          .update({
+            verification_tier: request.tier,
+            verified_by: user?.id,
+            verified_at: new Date().toISOString()
+          })
+          .eq('id', request.listing_id);
+
+        if (listingError) throw listingError;
+
+        // Send notification to requester
+        await supabase.rpc('create_notification', {
+          p_user_id: request.requester_id,
+          p_type: 'verification',
+          p_title: 'Verification Approved',
+          p_message: `Your ${request.tier} verification request has been approved`,
+          p_metadata: { listing_id: request.listing_id }
+        });
+      }
+
+      toast({
+        title: `Verification ${action}d`,
+        description: `The verification request has been ${action}d successfully`
+      });
+
+      fetchAdminData(); // Refresh data
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `Failed to ${action} verification request`,
         variant: "destructive"
       });
     }
@@ -210,6 +278,14 @@ export default function AdminDashboard() {
       <Tabs defaultValue="listings" className="space-y-4">
         <TabsList>
           <TabsTrigger value="listings">Listings Review</TabsTrigger>
+          <TabsTrigger value="verification">
+            Verification Requests
+            {verificationRequests.filter(r => r.status === 'pending').length > 0 && (
+              <Badge className="ml-2" variant="destructive">
+                {verificationRequests.filter(r => r.status === 'pending').length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="users">User Management</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
@@ -276,6 +352,89 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="verification" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Verification Requests</CardTitle>
+              <CardDescription>Review and approve seller verification requests</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {verificationRequests.map((request) => (
+                  <div key={request.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-medium">{request.listing?.title || 'Unknown Listing'}</h3>
+                        <Badge variant={
+                          request.status === 'approved' ? 'default' :
+                          request.status === 'rejected' ? 'destructive' :
+                          'secondary'
+                        }>
+                          {request.status}
+                        </Badge>
+                        <Badge variant="outline">
+                          {request.tier.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Requested by: {request.requester?.display_name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Listing ID: {request.listing?.listing_id}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Submitted: {new Date(request.created_at).toLocaleDateString()}
+                      </p>
+                      {request.documents && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium">Documents uploaded</p>
+                          {request.documents.notes && (
+                            <p className="text-xs text-muted-foreground mt-1">{request.documents.notes}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      {request.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => handleVerificationAction(request.id, 'approve')}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleVerificationAction(request.id, 'reject')}
+                          >
+                            <Ban className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/listings/${request.listing?.listing_id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {verificationRequests.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No verification requests yet
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
